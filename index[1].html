@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ha Myung Hee | Freelance Video Creator</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'main-bg': '#0c0c0c',
+                        'sub-bg': '#141414',
+                        'light-bg': '#f5f0e8',
+                        'text-dark': '#ede8df',
+                        'text-light': '#1a1a1a',
+                        'text-sub': '#6b6560',
+                        'point': '#e07a30',
+                        'point-sub': '#c9973a',
+                        'footer-bg': '#0a0a0a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        en: ['Inter', 'sans-serif'],
+                        kr: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/css">
+        body {
+            background-color: #0c0c0c;
+            color: #ede8df;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        /* Hide scrollbar for horizontal scroll */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Selection Color */
+        ::selection {
+            background-color: #e07a30;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React, ReactDOM, Babel, Lucide CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Intersection Observer Hook ---
+        function useIntersectionObserver(options = {}) {
+            const ref = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) {
+                        setIsVisible(true);
+                        observer.unobserve(entry.target);
+                    }
+                }, { threshold: 0.1, ...options });
+
+                if (ref.current) observer.observe(ref.current);
+                return () => { if (ref.current) observer.unobserve(ref.current); };
+            }, []);
+
+            return [ref, isVisible];
+        }
+
+        // --- FadeIn Component ---
+        const FadeIn = ({ children, delay = 0, className = '' }) => {
+            const [ref, isVisible] = useIntersectionObserver();
+            return (
+                <div
+                    ref={ref}
+                    className={`transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[30px]'} ${className}`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        // --- Navbar Component ---
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            useEffect(() => {
+                if (mobileMenuOpen) lucide.createIcons();
+            }, [mobileMenuOpen]);
+
+            return (
+                <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#0c0c0c]/90 backdrop-blur-md py-4' : 'bg-transparent py-6'}`}>
+                    <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+                        <a href="#" className="font-en font-bold text-[0.9rem] tracking-tight text-white">HA MYUNG HEE</a>
+                        
+                        <nav className="hidden md:flex gap-8 font-en text-sm font-semibold tracking-wide">
+                            <a href="#works" className="hover:text-point transition-colors">Works</a>
+                            <a href="#about" className="hover:text-point transition-colors">About</a>
+                            <a href="#skills" className="hover:text-point transition-colors">Skills</a>
+                            <a href="#contact" className="hover:text-point transition-colors">Contact</a>
+                        </nav>
+
+                        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            {mobileMenuOpen ? <i data-lucide="x"></i> : <i data-lucide="menu"></i>}
+                        </button>
+                    </div>
+
+                    {mobileMenuOpen && (
+                        <div className="absolute top-full left-0 w-full bg-[#0c0c0c]/95 backdrop-blur-md py-6 px-6 flex flex-col gap-4 md:hidden border-t border-white/10">
+                            <a href="#works" className="font-en text-lg hover:text-point" onClick={() => setMobileMenuOpen(false)}>Works</a>
+                            <a href="#about" className="font-en text-lg hover:text-point" onClick={() => setMobileMenuOpen(false)}>About</a>
+                            <a href="#skills" className="font-en text-lg hover:text-point" onClick={() => setMobileMenuOpen(false)}>Skills</a>
+                            <a href="#contact" className="font-en text-lg hover:text-point" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+                        </div>
+                    )}
+                </header>
+            );
+        };
+
+        // --- Hero Animation ---
+        const HeroSVGAnimation = () => {
+            const svgRef = useRef(null);
+            
+            useEffect(() => {
+                const svg = svgRef.current;
+                if (!svg) return;
+                
+                let width = window.innerWidth;
+                let height = window.innerHeight;
+                const numParticles = 25;
+                const colors = ['#e07a30', '#c9973a'];
+                
+                const particles = Array.from({ length: numParticles }).map(() => ({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 1.5 + 1,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    opacity: Math.random() * 0.2 + 0.3
+                }));
+
+                let mouse = { x: -1000, y: -1000 };
+                const handleMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+                const handleResize = () => { width = window.innerWidth; height = window.innerHeight; };
+
+                window.addEventListener('mousemove', handleMouseMove);
+                window.addEventListener('resize', handleResize);
+
+                let animationFrameId;
+                const animate = () => {
+                    let svgContent = '';
+                    for (let i = 0; i < particles.length; i++) {
+                        const p = particles[i];
+                        p.x += p.vx; p.y += p.vy;
+                        if (p.x < 0 || p.x > width) p.vx *= -1;
+                        if (p.y < 0 || p.y > height) p.vy *= -1;
+                        const dx = mouse.x - p.x; const dy = mouse.y - p.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 100) { p.x -= dx * 0.01; p.y -= dy * 0.01; }
+                        svgContent += `<circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${p.color}" opacity="${p.opacity}" />`;
+                    }
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const dx = particles[i].x - particles[j].x;
+                            const dy = particles[i].y - particles[j].y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 150) {
+                                const opacity = ((150 - dist) / 150) * 0.2;
+                                svgContent += `<line x1="${particles[i].x}" y1="${particles[i].y}" x2="${particles[j].x}" y2="${particles[j].y}" stroke="${particles[i].color}" stroke-width="0.5" opacity="${opacity}" />`;
+                            }
+                        }
+                    }
+                    svg.innerHTML = svgContent;
+                    animationFrameId = requestAnimationFrame(animate);
+                };
+                animate();
+                return () => {
+                    window.removeEventListener('mousemove', handleMouseMove);
+                    window.removeEventListener('resize', handleResize);
+                    cancelAnimationFrame(animationFrameId);
+                };
+            }, []);
+
+            return <svg ref={svgRef} className="absolute inset-0 w-full h-full z-0 pointer-events-none"></svg>;
+        };
+
+        // --- Hero Component ---
+        const Hero = () => {
+            const [loaded, setLoaded] = useState(false);
+            useEffect(() => setLoaded(true), []);
+
+            return (
+                <section className="relative h-screen flex items-center overflow-hidden">
+                    <HeroSVGAnimation />
+                    <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full">
+                        <div className={`transition-all duration-1000 ease-out delay-200 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            <p className="font-en text-text-sub text-sm md:text-base font-semibold tracking-wider uppercase mb-6">
+                                Freelance Video Creator — Based in Seoul
+                            </p>
+                        </div>
+                        <h1 className="font-en font-extrabold leading-[0.9] tracking-tighter text-[clamp(4rem,12vw,10rem)] mb-8">
+                            <div className={`transition-all duration-1000 ease-out delay-400 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                                <span className="text-point">Ha</span>
+                            </div>
+                            <div className={`transition-all duration-1000 ease-out delay-600 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                                Myung Hee
+                            </div>
+                        </h1>
+                        <div className={`transition-all duration-1000 ease-out delay-800 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            <p className="font-kr text-xl md:text-2xl font-light text-text-dark/80 mb-12">영상으로 브랜드를 움직입니다</p>
+                            <a href="#works" className="inline-flex items-center gap-2 px-8 py-4 border border-text-dark/30 rounded-full hover:bg-text-dark hover:text-main-bg transition-all duration-300 font-kr font-medium">
+                                Works 보기 <span className="font-en">→</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Works Component ---
+        const Works = () => {
+            const scrollRef = useRef(null);
+            const [isDragging, setIsDragging] = useState(false);
+            const [startX, setStartX] = useState(0);
+            const [scrollLeft, setScrollLeft] = useState(0);
+
+            const handleMouseDown = (e) => {
+                if (!scrollRef.current) return;
+                setIsDragging(true);
+                setStartX(e.pageX - scrollRef.current.offsetLeft);
+                setScrollLeft(scrollRef.current.scrollLeft);
+            };
+            const handleMouseLeave = () => setIsDragging(false);
+            const handleMouseUp = () => setIsDragging(false);
+            const handleMouseMove = (e) => {
+                if (!isDragging || !scrollRef.current) return;
+                e.preventDefault();
+                const x = e.pageX - scrollRef.current.offsetLeft;
+                const walk = (x - startX) * 2;
+                scrollRef.current.scrollLeft = scrollLeft - walk;
+            };
+            const handleWheel = (e) => {
+                if (!scrollRef.current) return;
+                if (e.deltaY !== 0) scrollRef.current.scrollLeft += e.deltaY;
+            };
+
+            const projects = [
+                { title: "Brand Story", category: "Corporate Film", img: "https://images.unsplash.com/photo-1536240478700-b869070f9279?q=80&w=2000&auto=format&fit=crop" },
+                { title: "Product Launch", category: "Commercial", img: "https://images.unsplash.com/photo-1601506521937-0121a7fc2a6b?q=80&w=2000&auto=format&fit=crop" },
+                { title: "Music Video", category: "Music Video", img: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?q=80&w=2000&auto=format&fit=crop" }
+            ];
+
+            return (
+                <section id="works" className="py-32 bg-main-bg overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-6 md:px-12 mb-16">
+                        <FadeIn><h2 className="font-en text-4xl md:text-5xl font-bold tracking-tight text-white">Works</h2></FadeIn>
+                    </div>
+                    <div 
+                        ref={scrollRef}
+                        className="flex gap-12 px-6 md:px-12 overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing pb-12"
+                        onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} onWheel={handleWheel}
+                    >
+                        {projects.map((project, idx) => (
+                            <div key={idx} className="flex-shrink-0 flex items-center gap-12 group">
+                                <div className="relative w-[80vw] md:w-[60vw] max-w-[900px] aspect-[2.35/1] overflow-hidden bg-sub-bg">
+                                    <img src={project.img} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none" />
+                                    <div className="absolute inset-0 bg-point/0 group-hover:bg-point/15 transition-colors duration-500 pointer-events-none"></div>
+                                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 pointer-events-none">
+                                        <p className="font-en text-text-dark/70 text-sm md:text-base mb-2 tracking-widest uppercase">{project.category}</p>
+                                        <h3 className="font-en text-2xl md:text-4xl font-bold text-white">{project.title}</h3>
+                                    </div>
+                                </div>
+                                {idx < projects.length - 1 && (
+                                    <div className="hidden md:flex flex-col gap-4 opacity-20">
+                                        {[...Array(5)].map((_, i) => <svg key={i} width="12" height="24" viewBox="0 0 12 24" fill="none"><rect width="12" height="24" rx="2" fill="currentColor"/></svg>)}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        };
+
+        // --- About Component ---
+        const About = () => (
+            <section id="about" className="py-32 bg-light-bg text-text-light relative overflow-hidden">
+                <div className="absolute left-[-5%] top-1/2 -translate-y-1/2 font-en font-extrabold text-[15rem] md:text-[30rem] leading-none text-text-light opacity-5 pointer-events-none select-none">H</div>
+                <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 grid md:grid-cols-12 gap-12">
+                    <div className="md:col-span-5"></div>
+                    <div className="md:col-span-7">
+                        <FadeIn>
+                            <p className="font-en text-point font-bold tracking-widest uppercase mb-8">About</p>
+                            <h2 className="font-kr text-3xl md:text-5xl font-bold leading-tight mb-10">브랜드를 움직이는<br />영상 제작자</h2>
+                            <p className="font-kr text-lg md:text-xl text-text-light/80 leading-relaxed font-light mb-16 max-w-2xl">기업 홍보 영상, 광고, 뮤직비디오를 중심으로 활동하는 영상 디렉터입니다.<br className="hidden md:block" />기획부터 촬영, 편집, 컬러 그레이딩까지 전 과정을 일관된 퀄리티로 제공합니다.</p>
+                            <div className="space-y-6 font-kr text-base md:text-lg">
+                                <div className="flex gap-8 border-b border-text-light/10 pb-6"><span className="font-en font-bold text-text-light/50 w-16">2018</span><span className="font-medium">영상 작업 시작</span></div>
+                                <div className="flex gap-8 border-b border-text-light/10 pb-6"><span className="font-en font-bold text-text-light/50 w-16">2021</span><span className="font-medium">프리랜서 전향</span></div>
+                                <div className="flex gap-8 border-b border-text-light/10 pb-6"><span className="font-en font-bold text-text-light/50 w-16">2024</span><span className="font-medium">연간 50편 이상 제작</span></div>
+                            </div>
+                        </FadeIn>
+                    </div>
+                </div>
+            </section>
+        );
+
+        // --- Skills Component ---
+        const Skills = () => {
+            const skills = [
+                { title: "영상 편집", en: "Video Editing", tools: "Premiere Pro · DaVinci Resolve", icon: "video" },
+                { title: "모션 그래픽", en: "Motion Graphics", tools: "After Effects · Fusion", icon: "box" },
+                { title: "촬영", en: "Cinematography", tools: "Sony FX3 · Blackmagic", icon: "camera" },
+                { title: "컬러 그레이딩", en: "Color Grading", tools: "DaVinci Resolve", icon: "aperture" }
+            ];
+            return (
+                <section id="skills" className="py-32 bg-sub-bg">
+                    <div className="max-w-7xl mx-auto px-6 md:px-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                            {skills.map((skill, idx) => (
+                                <FadeIn key={idx} delay={idx * 100}>
+                                    <div className="group flex flex-col items-start">
+                                        <div className="text-point mb-8 transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(224,122,48,0.6)]">
+                                            <i data-lucide={skill.icon} stroke-width="1.2" style={{width: '48px', height: '48px'}}></i>
+                                        </div>
+                                        <h3 className="font-kr text-xl font-bold mb-1 text-white">{skill.title}</h3>
+                                        <p className="font-en text-text-sub text-sm tracking-wider uppercase mb-4">{skill.en}</p>
+                                        <p className="font-en text-text-dark/80 font-light">{skill.tools}</p>
+                                    </div>
+                                </FadeIn>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Contact Component ---
+        const Contact = () => (
+            <section id="contact" className="py-40 bg-main-bg flex flex-col items-center justify-center text-center px-6">
+                <FadeIn className="flex flex-col items-center">
+                    <h2 className="font-en font-extrabold text-[clamp(3rem,8vw,7rem)] leading-[0.9] tracking-tighter mb-8 text-white"><div>Let's Work</div><div className="text-text-dark/40">Together</div></h2>
+                    <p className="font-kr text-lg md:text-xl text-text-sub font-light mb-16">프로젝트 문의는 언제든지 환영합니다</p>
+                    <a href="mailto:hello@hamyunghee.com" className="font-en text-2xl md:text-4xl text-point font-bold relative group pb-2 mb-20">hello@hamyunghee.com<span className="absolute bottom-0 left-0 w-0 h-[2px] bg-point transition-all duration-500 ease-out group-hover:w-full"></span></a>
+                    <div className="flex gap-8 text-text-dark/60">
+                        <a href="#" className="hover:text-point transition-colors"><i data-lucide="twitter"></i></a>
+                        <a href="#" className="hover:text-point transition-colors"><i data-lucide="instagram"></i></a>
+                        <a href="#" className="hover:text-point transition-colors"><i data-lucide="youtube"></i></a>
+                        <a href="#" className="hover:text-point transition-colors"><i data-lucide="video"></i></a>
+                    </div>
+                </FadeIn>
+            </section>
+        );
+
+        // --- Footer Component ---
+        const Footer = () => (
+            <footer className="bg-footer-bg pt-1">
+                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-point to-transparent opacity-30"></div>
+                <div className="py-8 text-center"><p className="font-en text-text-sub text-sm tracking-widest uppercase">© 2026 Ha Myung Hee</p></div>
+            </footer>
+        );
+
+        // --- Main App ---
+        const App = () => {
+            useEffect(() => { lucide.createIcons(); }, []);
+            return (
+                <div className="bg-main-bg text-text-dark font-sans min-h-screen selection:bg-point selection:text-white">
+                    <Navbar />
+                    <main><Hero /><Works /><About /><Skills /><Contact /></main>
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
